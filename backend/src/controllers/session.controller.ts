@@ -144,7 +144,7 @@ export const webhookPago = async (req: Request, res: Response) => {
       // Convert ID back to UUID format
       const sessionId = paymentId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
 
-      console.log("Payment ID:", paymentId);
+      console.log("webhookPago Payment ID:", paymentId);
       console.log("Session ID (UUID):", sessionId);
 
       // Update session as paid

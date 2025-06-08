@@ -18,7 +18,7 @@ export class MercadoPagoService {
       const preference = new Preference(this.client);
       //Create a ID for the payment with the sessionId but taking out the -
       const paymentId = sessionId.replace(/-/g, '');
-      console.log("Payment ID:", paymentId);
+      console.log("createPayment Payment ID:", paymentId);
 
       const response = await preference.create({
         body: {
