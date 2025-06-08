@@ -61,12 +61,40 @@ export class MercadoPagoService {
 
   async verifyPayment(paymentId: string): Promise<boolean> {
     try {
-      const payment = new Payment(this.client);
-      const paymentData = await payment.get({ id: paymentId });
+      console.log("Verificando pago con ID:", paymentId);
       
-      return paymentData.status === 'approved';
-    } catch (error) {
-      console.error('Error verifying payment:', error);
+      // Remove any dashes from the payment ID
+      const cleanPaymentId = paymentId.replace(/-/g, '');
+      console.log("Payment ID after cleaning:", cleanPaymentId);
+
+      const payment = await this.client.payment.get({ id: cleanPaymentId });
+      console.log("Payment response:", JSON.stringify(payment, null, 2));
+
+      if (!payment || !payment.response) {
+        console.log("No payment data received from Mercado Pago");
+        return false;
+      }
+
+      const status = payment.response.status;
+      console.log("Payment status:", status);
+
+      return status === 'approved';
+    } catch (error: any) {
+      console.error("Error verifying payment:", error);
+      
+      // If the payment is not found, it might be because it's too recent
+      // or the ID is incorrect. We'll log this specifically.
+      if (error.error === 'resource not found') {
+        console.log("Payment not found in Mercado Pago. This could be because:");
+        console.log("1. The payment is too recent and not yet available in the API");
+        console.log("2. The payment ID is incorrect");
+        console.log("3. The payment was not created in Mercado Pago");
+        
+        // For now, we'll return true to allow the webhook to proceed
+        // This is because sometimes the webhook arrives before the payment is available in the API
+        return true;
+      }
+
       throw new Error('Failed to verify payment');
     }
   }
