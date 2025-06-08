@@ -48,6 +48,7 @@ export class MercadoPagoService {
       if (!response.id || !response.init_point) {
         throw new Error('Invalid response from Mercado Pago');
       }
+      console.log("createPayment Response ID:", response.id);
 
       return {
         id: String(response.id),

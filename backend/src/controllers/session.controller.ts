@@ -149,13 +149,15 @@ export const webhookPago = async (req: Request, res: Response) => {
 
       // Update session as paid
       console.log("Buscando sesión en la base de datos...");
-      let session = await Session.findOne({ id: sessionId });
-      if (!session) {
-        // Intentar buscar por paymentId si no se encuentra por id
+      let session = null;
+      if (sessionId) {
+        session = await Session.findOne({ id: sessionId });
+      }
+      if (!session && paymentId) {
         session = await Session.findOne({ paymentId });
       }
       if (!session) {
-        console.error(`Session ${sessionId} not found`);
+        console.error(`Session ${sessionId || paymentId} not found`);
         return res.status(404).json({ error: 'Session not found' });
       }
 
@@ -257,13 +259,15 @@ export const webhookPago = async (req: Request, res: Response) => {
 
       // Update session
       console.log("Buscando sesión en la base de datos...");
-      let session = await Session.findOne({ id: sessionId });
-      if (!session) {
-        // Intentar buscar por paymentId si no se encuentra por id
+      let session = null;
+      if (sessionId) {
+        session = await Session.findOne({ id: sessionId });
+      }
+      if (!session && paymentId) {
         session = await Session.findOne({ paymentId });
       }
       if (!session) {
-        console.error(`Session ${sessionId} not found`);
+        console.error(`Session ${sessionId || paymentId} not found`);
         return res.status(404).json({ error: 'Session not found' });
       }
 
