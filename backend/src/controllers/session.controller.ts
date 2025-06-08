@@ -125,18 +125,14 @@ export const getSessionById = async (req: Request, res: Response) => {
 };
 
 export const webhookPago = async (req: Request, res: Response) => {
-  console.log('Webhook recibido:', req.body);
+  console.log("Webhook recibido", req.body);
   try {
     const { type, data } = req.body;
 
     if (type === 'payment') {
       const paymentId = data.id;
-      const sessionId = data.metadata?.sessionId;
-
-      if (!sessionId) {
-        console.error('No sessionId found in payment metadata');
-        return res.status(400).json({ error: 'No sessionId found' });
-      }
+      // Use paymentId as sessionId since that's what we set in the payment creation
+      const sessionId = paymentId;
 
       // Verify payment with Mercado Pago
       const isApproved = await mercadoPagoService.verifyPayment(paymentId);
