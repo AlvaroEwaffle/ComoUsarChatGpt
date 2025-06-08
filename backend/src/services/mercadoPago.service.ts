@@ -67,15 +67,17 @@ export class MercadoPagoService {
       const cleanPaymentId = paymentId.replace(/-/g, '');
       console.log("Payment ID after cleaning:", cleanPaymentId);
 
-      const payment = await this.client.payment.get({ id: cleanPaymentId });
-      console.log("Payment response:", JSON.stringify(payment, null, 2));
+      // Create a new Payment instance
+      const payment = new Payment(this.client);
+      const paymentData = await payment.get({ id: cleanPaymentId });
+      console.log("Payment response:", JSON.stringify(paymentData, null, 2));
 
-      if (!payment || !payment.response) {
+      if (!paymentData || !paymentData.status) {
         console.log("No payment data received from Mercado Pago");
         return false;
       }
 
-      const status = payment.response.status;
+      const status = paymentData.status;
       console.log("Payment status:", status);
 
       return status === 'approved';
