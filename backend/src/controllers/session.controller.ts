@@ -149,7 +149,11 @@ export const webhookPago = async (req: Request, res: Response) => {
 
       // Update session as paid
       console.log("Buscando sesión en la base de datos...");
-      const session = await Session.findOne({ id: sessionId });
+      let session = await Session.findOne({ id: sessionId });
+      if (!session) {
+        // Intentar buscar por paymentId si no se encuentra por id
+        session = await Session.findOne({ paymentId });
+      }
       if (!session) {
         console.error(`Session ${sessionId} not found`);
         return res.status(404).json({ error: 'Session not found' });
@@ -253,7 +257,11 @@ export const webhookPago = async (req: Request, res: Response) => {
 
       // Update session
       console.log("Buscando sesión en la base de datos...");
-      const session = await Session.findOne({ id: sessionId });
+      let session = await Session.findOne({ id: sessionId });
+      if (!session) {
+        // Intentar buscar por paymentId si no se encuentra por id
+        session = await Session.findOne({ paymentId });
+      }
       if (!session) {
         console.error(`Session ${sessionId} not found`);
         return res.status(404).json({ error: 'Session not found' });
@@ -290,6 +298,9 @@ export const paySession = async (req: Request, res: Response) => {
     }
 
     const response = await mercadoPagoService.createPayment(sessionId);
+    // Guardar el paymentId en la sesión
+    session.paymentId = response.id;
+    await session.save();
     // Treat response as an object with id and init_point
     return res.json({
       success: true,
@@ -298,7 +309,7 @@ export const paySession = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error creating payment:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Error creating payment' });
   }
 };
 

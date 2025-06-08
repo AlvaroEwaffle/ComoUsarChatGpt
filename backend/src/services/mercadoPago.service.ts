@@ -24,7 +24,7 @@ export class MercadoPagoService {
         body: {
           items: [
             {
-              id: paymentId,
+              id: "service_ia",
               title: "Servicio potenciado con IA",
               unit_price: this.PAYMENT_AMOUNT,
               quantity: 1,

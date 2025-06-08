@@ -126,7 +126,7 @@ export interface ISession extends Document {
   isPaid: boolean;
   premium_development: boolean;
   createdAt: Date;
-
+  paymentId: string;
 }
 
 const sessionSchema = new Schema<ISession>({
@@ -150,7 +150,8 @@ const sessionSchema = new Schema<ISession>({
   },
   isPaid: { type: Boolean, default: false },
   premium_development: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  paymentId: { type: String, required: false },
 });
 
 export const Session = mongoose.model<ISession>('Session', sessionSchema); 
