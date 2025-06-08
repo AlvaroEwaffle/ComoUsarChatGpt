@@ -1,20 +1,10 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Form from "./pages/Form";
-import Preview from "./pages/Preview";
-import Success from "./pages/Success";
-import Error from "./pages/Error";
-import NotFound from "./pages/NotFound";
-import PremiumResult from "./components/PremiumResult";
-import PremiumResultLoader from "./components/PremiumResultLoader";
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import PremiumResult from './PremiumResult';
 
-const queryClient = new QueryClient();
-
+// Mock premium data example
 const mockPremiumData = {
+  sessionId: 'mock',
   preview: {
     propuesta_valor: "Ayudo a adultos mayores a reconectarse con su cuerpo y emociones a través de clases de yoga adaptadas, mejorando su movilidad, bienestar y autoestima.",
     descripcion_potencia_ia: "La IA puede ayudarte a personalizar clases según el estado emocional del alumno, crear rutinas personalizadas y generar contenido educativo automatizado. Por ejemplo, podrías usar ChatGPT para crear una rutina semanal adaptada al nivel de energía del grupo, o para responder dudas frecuentes de tus alumnos.",
@@ -28,7 +18,7 @@ const mockPremiumData = {
       "Diseñar emails semanales con tips personalizados para cada alumno."
     ]
   },
-  premium: {
+  pro: {
     propuesta_valor_pro: {
       bio: "Instructor de yoga para adultos mayores. Clases suaves, adaptadas y reconectadas con el cuerpo y la emoción.",
       imagen_alt: "Imagen de una clase de yoga suave con adultos mayores felices y conectados."
@@ -149,27 +139,39 @@ const mockPremiumData = {
         cta: "Reserva tu primera clase"
       }
     }
-  }
+  },
+  isPaid: true
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Form />} />
-          <Route path="/preview/:sessionId" element={<Preview />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/error" element={<Error />} />
-          <Route path="/premium-result-demo" element={<PremiumResult data={mockPremiumData} />} />
-          <Route path="/premium-result/:sessionId" element={<PremiumResultLoader />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const PremiumResultLoader = () => {
+  const { sessionId } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default App;
+  useEffect(() => {
+    if (!sessionId) return;
+    setLoading(true);
+    setError(null);
+    if (sessionId === 'mock') {
+      setData(mockPremiumData);
+      setLoading(false);
+      return;
+    }
+    fetch(`http://localhost:3000/api/sessions/${sessionId}/premium`)
+      .then(res => {
+        if (!res.ok) throw new Error('No se pudo cargar el resultado premium');
+        return res.json();
+      })
+      .then(setData)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [sessionId]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-lg">Cargando resultado premium...</div>;
+  if (error || !data) return <div className="min-h-screen flex items-center justify-center text-red-600">{error || 'Error al cargar los datos.'}</div>;
+
+  return <PremiumResult data={data} />;
+};
+
+export default PremiumResultLoader; 

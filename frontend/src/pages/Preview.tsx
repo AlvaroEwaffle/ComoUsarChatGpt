@@ -60,29 +60,18 @@ const Preview = () => {
         }
         data = await response.json();
 
-        // Clean up the JSON string by removing trailing commas
-        const cleanJson = data.valueProposition
-          .trim()
-          .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas before } or ]
-
-        console.log('Cleaned JSON:', cleanJson); // Debug log
-
-        // Parse the valueProposition string into an object
-        const parsedValueProp = JSON.parse(cleanJson);
-
-        // Create the session data object with the parsed content
+        // Use the new API response structure directly
         const sessionDataObj: SessionData = {
-          sessionId: sessionId,
+          sessionId: data.sessionId,
           isPaid: data.isPaid,
-          preview: parsedValueProp.preview,
-          pro: parsedValueProp.pro
+          preview: data.preview,
+          pro: data.pro
         };
 
         setSessionData(sessionDataObj);
         setFormData(JSON.parse(localStorage.getItem('serviceFormData') || '{}'));
       } catch (error) {
         console.error('Error fetching session:', error);
-        console.error('Raw valueProposition:', data?.valueProposition); // Debug log
         toast({
           title: "Error",
           description: "No se pudo cargar la sesión. Por favor, intenta nuevamente.",
@@ -268,7 +257,7 @@ const Preview = () => {
                   Accede a tu propuesta de valor lista para compartir
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Prompts listos para usar 
+                  Prompts listos para usar
                 </p>
                 <div className="text-3xl font-bold text-primary-500 mb-6">
                   💰 Solo $9.990 CLP
@@ -276,9 +265,17 @@ const Preview = () => {
                 <Button
                   onClick={handlePayment}
                   size="lg"
-                  className="bg-yellow-500 hover:bg-primary-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-yellow-500 hover:bg-primary-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-4"
                 >
                   Desbloquear ahora
+                </Button>
+                <Button
+                  onClick={() => navigate('/premium-result/mock')}
+                  size="lg"
+                  variant="outline"
+                  className="border-purple-300 bg-purple-300 text-black-200 font-semibold mb-2"
+                >
+                  Ver un Ejemplo de lo que obtendrás
                 </Button>
                 <div className="mt-6 space-y-2 text-sm text-gray-600">
                   <p className="flex items-center justify-center space-x-2">
@@ -430,8 +427,12 @@ const Preview = () => {
                 {/* Service Map Preview */}
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
-                    {sessionData?.pro.mapa_servicio.titulo_servicio}
+                    Hemos pensado en una estructura de servicio especialmente pensado en tus clientes
                   </h4>
+                  <h4 className="text-gray-900 mb-3">
+                    Título del servicio: {sessionData?.pro.mapa_servicio.titulo_servicio}
+                  </h4>
+
                   <ul className="space-y-2">
                     {sessionData?.pro.mapa_servicio.etapas.map((etapa, index) => (
                       <li key={index} className="flex items-center space-x-2">
@@ -442,11 +443,14 @@ const Preview = () => {
                       </li>
                     ))}
                   </ul>
+                  <h4 className="font-semibold text-gray-900 mb-3 mt-3">
+                    Tenemos el paso a paso de cada etapa del servicio listas para que puedas implementar en tu servicio
+                  </h4>
                 </div>
 
                 {/* Prompt Example Preview */}
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Ejemplo de Prompt</h4>
+                  <h3 className="font-semibold text-gray-900 mb-2">Te entregamos prompts para cada etapa del servicio para que saques el máximo provecho de tu servicio, por ejemplo:</h3>
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">{sessionData?.pro.prompt_ejemplo[0]?.etapa}</p>
                     <p className="text-gray-700">{sessionData?.pro.prompt_ejemplo[0]?.prompt}</p>
@@ -483,7 +487,7 @@ const Preview = () => {
                   </li>
                   <li className="flex items-start space-x-2">
                     <Check className="w-5 h-5 text-green-500 mt-1" />
-                    <span>Testimonio Pro</span>
+                    <span>Una mini landing page para atraer más clientes</span>
                   </li>
 
                 </ul>
@@ -498,15 +502,23 @@ const Preview = () => {
                   >
                     Desbloquear ahora
                   </Button>
+                  <Button
+                    onClick={() => navigate('/premium-result/mock')}
+                    size="lg"
+                    variant="outline"
+                    className="border-purple-300 bg-purple-300 text-black-200 font-semibold mb-2"
+                  >
+                    Ver un Ejemplo de lo que obtendrás
+                  </Button>
                   <div className="w-full max-w-sm">
                     <ul className="text-left space-y-2 text-sm text-gray-600">
-                    <li className="flex items-center space-x-2">
+                      <li className="flex items-center space-x-2 font-semibold">
                         <span>Pago 100% seguro con MercadoPago</span>
                       </li>
                       <li className="flex items-center space-x-2">
                         <span>Más de 50 profesionales ya han potenciado sus servicios con esta herramienta</span>
                       </li>
-                      
+
                     </ul>
                   </div>
                 </div>

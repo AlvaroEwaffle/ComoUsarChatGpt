@@ -12,7 +12,7 @@ export class MercadoPagoService {
     this.client = new MercadoPagoConfig({ accessToken: accessToken });
   }
 
-  async createPayment(sessionId: string): Promise<string> {
+  async createPayment(sessionId: string): Promise<{ id: string; init_point: string }> {
     try {
       const preference = new Preference(this.client);
       const response = await preference.create({
@@ -39,8 +39,11 @@ export class MercadoPagoService {
       console.log('--------------------------------');
       console.log('response', response);
 
-      return response;
-
+      // Return only the needed fields
+      return {
+        id: String(response.id || ''),
+        init_point: String(response.init_point || '')
+      };
     } catch (error) {
       console.error('Error creating payment:', error);
       throw error;

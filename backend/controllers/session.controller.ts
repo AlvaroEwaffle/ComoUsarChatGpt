@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { generateSession } from '../services/openai.service';
-import { Session } from '../models/Session';
-import mongoose from 'mongoose';
+import { Session } from '../models/session.model';
+import { generateSession, generatePremiumSession } from '../services/openai.service';
 import { MercadoPagoService } from '../services/mercadoPago.service';
+import mongoose from 'mongoose';
 
 // MongoDB connection string (replace with your actual connection string)
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/comousarchatgpt';
@@ -36,15 +36,39 @@ export const createSession = async (req: Request, res: Response) => {
       resultados: results
     });
 
-    // Create session data
+    
+    // Remove trailing commas before parsing
+    let safeValueProp = valueProp.replace(/,\s*([}\]])/g, '$1');
+    let parsed;
+    try {
+      parsed = JSON.parse(safeValueProp);
+    } catch (e) {
+      console.error('Error parsing OpenAI response:', e, safeValueProp);
+      return res.status(500).json({ error: 'Invalid response from OpenAI' });
+    }
+
+    
+
+    // Create session data using the new schema
     const session = new Session({
       id: sessionId,
       service,
       strengths,
       targetAudience,
       results,
-      valueProposition: valueProp,
+      propuesta_valor: parsed.propuesta_valor || '',
+      descripcion_potencia_ia: parsed.descripcion_potencia_ia || '',
+      ideas_IA: parsed.ideas_IA || [],
+      pro: {
+        propuesta_valor_pro: parsed.propuesta_valor_pro || {},
+        mapa_servicio: parsed.mapa_servicio || {},
+        prompt_ejemplo: parsed.prompt_ejemplo || [],
+        infografia: parsed.infografia || {},
+        checklist_servicio: parsed.checklist_servicio || {},
+        landing_page: parsed.landing_page || {},
+      },
       isPaid: false,
+      premium_development: false,
       createdAt: new Date()
     });
 
@@ -53,7 +77,20 @@ export const createSession = async (req: Request, res: Response) => {
 
     res.status(201).json({
       sessionId,
-      valueProposition: valueProp
+      preview: {
+        propuesta_valor: parsed.propuesta_valor || '',
+        descripcion_potencia_ia: parsed.descripcion_potencia_ia || '',
+        ideas_IA: parsed.ideas_IA || []
+      },
+      pro: {
+        propuesta_valor_pro: parsed.propuesta_valor_pro || {},
+        mapa_servicio: parsed.mapa_servicio || {},
+        prompt_ejemplo: parsed.prompt_ejemplo || [],
+        infografia: parsed.infografia || {},
+        checklist_servicio: parsed.checklist_servicio || {},
+        landing_page: parsed.landing_page || {},
+      },
+      isPaid: false
     });
   } catch (error) {
     console.error('Error creating session:', error);
@@ -65,22 +102,22 @@ export const getSessionById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const session = await Session.findOne({ id });
-
+    
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    // If session is not paid, only return limited information
-    if (!session.isPaid) {
-      const { valueProposition } = session;
-      return res.json({
-        valueProposition,
-        isPaid: false
-      });
-    }
-
-    // Return full session data if paid
-    res.json(session);
+    // Always return the new structured format
+    res.json({
+      sessionId: session.id,
+      preview: {
+        propuesta_valor: session.propuesta_valor,
+        descripcion_potencia_ia: session.descripcion_potencia_ia,
+        ideas_IA: session.ideas_IA
+      },
+      pro: session.pro,
+      isPaid: session.isPaid
+    });
   } catch (error) {
     console.error('Error getting session:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -111,7 +148,7 @@ export const paySession = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.body;
     const session = await Session.findOne({ id: sessionId });
-
+    
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
@@ -121,8 +158,7 @@ export const paySession = async (req: Request, res: Response) => {
     }
 
     const response = await mercadoPagoService.createPayment(sessionId);
-    console.log('response', response.id, response.init_point);
-
+    // Treat response as an object with id and init_point
     return res.json({
       success: true,
       init_point: response.init_point,
@@ -130,6 +166,68 @@ export const paySession = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error creating payment:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getPremiumResult = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const session = await Session.findOne({ id: sessionId });
+    
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Only allow if paid
+    if (!session.isPaid) {
+      return res.status(403).json({ error: 'Session not paid' });
+    }
+
+    // If already generated, return it
+    if (session.premium_development) {
+      return res.json({
+        sessionId: session.id,
+        preview: {
+          propuesta_valor: session.propuesta_valor,
+          descripcion_potencia_ia: session.descripcion_potencia_ia,
+          ideas_IA: session.ideas_IA
+        },
+        pro: session.pro,
+        isPaid: session.isPaid
+      });
+    }
+
+    // Generate premium result using structured preview fields
+    const premiumData = await generatePremiumSession({
+      servicio: session.service,
+      fortalezas: session.strengths,
+      audiencia: session.targetAudience,
+      resultados: session.results,
+      preview: {
+        propuesta_valor: session.propuesta_valor,
+        descripcion_potencia_ia: session.descripcion_potencia_ia,
+        ideas_IA: session.ideas_IA
+      }
+    });
+
+    // Save premium data in session.pro
+    session.pro = premiumData;
+    session.premium_development = true;
+    await session.save();
+
+    res.json({
+      sessionId: session.id,
+      preview: {
+        propuesta_valor: session.propuesta_valor,
+        descripcion_potencia_ia: session.descripcion_potencia_ia,
+        ideas_IA: session.ideas_IA
+      },
+      pro: session.pro,
+      isPaid: session.isPaid
+    });
+  } catch (error) {
+    console.error('Error getting premium result:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }; 
