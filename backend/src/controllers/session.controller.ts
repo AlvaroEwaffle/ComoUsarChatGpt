@@ -4,6 +4,7 @@ import { Session } from '../models/session.model';
 import { generateSession, generatePremiumSession } from '../services/openai.service';
 import { MercadoPagoService } from '../services/mercadoPago.service';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 
 // MongoDB connection string (replace with your actual connection string)
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/comousarchatgpt';
@@ -125,17 +126,80 @@ export const getSessionById = async (req: Request, res: Response) => {
 };
 
 export const webhookPago = async (req: Request, res: Response) => {
-  console.log("Webhook recibido", req.body);
+  console.log("=== WEBHOOK RECIBIDO ===");
+  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+  console.log("Body:", JSON.stringify(req.body, null, 2));
+  
   try {
+    // Handle test requests from Mercado Pago
+    if (Object.keys(req.body).length === 0) {
+      console.log("Test webhook received from Mercado Pago - Responding OK");
+      return res.status(200).send('OK');
+    }
+
+    // Verify webhook signature
+    const signature = req.headers['x-signature'] as string;
+    const timestamp = req.headers['x-timestamp'] as string;
+    const webhookSecret = process.env.MP_WEBHOOK_SECRETKEY;
+
+    console.log("=== VERIFICACIÓN DE FIRMA ===");
+    console.log("Signature present:", !!signature);
+    console.log("Timestamp present:", !!timestamp);
+    console.log("WebhookSecret present:", !!webhookSecret);
+
+    if (!signature || !timestamp || !webhookSecret) {
+      console.error('Missing webhook verification data:', {
+        signature: !!signature,
+        timestamp: !!timestamp,
+        webhookSecret: !!webhookSecret
+      });
+      return res.status(400).json({ error: 'Invalid webhook request' });
+    }
+
+    // Create signature verification string
+    const payload = JSON.stringify(req.body);
+    const verificationString = `${timestamp}.${payload}`;
+    
+    // Create HMAC
+    const hmac = crypto.createHmac('sha256', webhookSecret);
+    hmac.update(verificationString);
+    const calculatedSignature = hmac.digest('hex');
+
+    console.log("=== COMPARACIÓN DE FIRMAS ===");
+    console.log("Received signature:", signature);
+    console.log("Calculated signature:", calculatedSignature);
+
+    // Compare signatures
+    if (signature !== calculatedSignature) {
+      console.error('Invalid webhook signature', {
+        received: signature,
+        calculated: calculatedSignature
+      });
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
     const { type, data } = req.body;
+    console.log("=== DATOS DEL PAGO ===");
+    console.log("Type:", type);
+    console.log("Data:", JSON.stringify(data, null, 2));
 
     if (type === 'payment') {
-      const paymentId = data.id;
-      // Use paymentId as sessionId since that's what we set in the payment creation
-      const sessionId = paymentId;
+      const paymentId = data.id.replace(/-/g, '');
+      const sessionId = data.external_reference;
+
+      console.log("=== PROCESANDO PAGO ===");
+      console.log("Payment ID:", paymentId);
+      console.log("Session ID:", sessionId);
+
+      if (!sessionId) {
+        console.error('No external_reference found in payment data');
+        return res.status(400).json({ error: 'No session reference found' });
+      }
 
       // Verify payment with Mercado Pago
+      console.log("Verificando pago con Mercado Pago...");
       const isApproved = await mercadoPagoService.verifyPayment(paymentId);
+      console.log("Pago verificado, aprobado:", isApproved);
       
       if (!isApproved) {
         console.error(`Payment ${paymentId} not approved`);
@@ -143,21 +207,25 @@ export const webhookPago = async (req: Request, res: Response) => {
       }
 
       // Update session as paid
+      console.log("Buscando sesión en la base de datos...");
       const session = await Session.findOne({ id: sessionId });
       if (!session) {
         console.error(`Session ${sessionId} not found`);
         return res.status(404).json({ error: 'Session not found' });
       }
 
+      console.log("Actualizando sesión como pagada...");
       session.isPaid = true;
       await session.save();
       
-      console.log(`Session ${sessionId} marked as paid`);
+      console.log(`Session ${sessionId} marked as paid successfully`);
     }
 
+    console.log("=== WEBHOOK PROCESADO EXITOSAMENTE ===");
     res.status(200).send('OK');
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('=== ERROR PROCESANDO WEBHOOK ===');
+    console.error('Error details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

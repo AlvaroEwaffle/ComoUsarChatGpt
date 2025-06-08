@@ -16,11 +16,15 @@ export class MercadoPagoService {
   async createPayment(sessionId: string): Promise<{ id: string; init_point: string }> {
     try {
       const preference = new Preference(this.client);
+      //Create a ID for the payment with the sessionId but taking out the -
+      const paymentId = sessionId.replace(/-/g, '');
+      console.log("Payment ID:", paymentId);
+
       const response = await preference.create({
         body: {
           items: [
             {
-              id: sessionId,
+              id: paymentId,
               title: "Servicio potenciado con IA",
               unit_price: this.PAYMENT_AMOUNT,
               quantity: 1,
@@ -34,6 +38,7 @@ export class MercadoPagoService {
           },
           auto_return: 'approved',
           notification_url: "https://comousarchatgpt-production.up.railway.app/api/sessions/webhook",
+          external_reference: sessionId,
           metadata: {
             sessionId
           }
