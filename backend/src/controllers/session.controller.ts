@@ -125,16 +125,38 @@ export const getSessionById = async (req: Request, res: Response) => {
 };
 
 export const webhookPago = async (req: Request, res: Response) => {
+  console.log('Webhook recibido:', req.body);
   try {
     const { type, data } = req.body;
 
     if (type === 'payment') {
-      const { id } = data;
-      // Here you would verify the payment with Mercado Pago
-      // and update the session status accordingly
+      const paymentId = data.id;
+      const sessionId = data.metadata?.sessionId;
+
+      if (!sessionId) {
+        console.error('No sessionId found in payment metadata');
+        return res.status(400).json({ error: 'No sessionId found' });
+      }
+
+      // Verify payment with Mercado Pago
+      const isApproved = await mercadoPagoService.verifyPayment(paymentId);
       
-      // For now, we'll just mark it as paid
-      await Session.updateOne({ id }, { $set: { isPaid: true } });
+      if (!isApproved) {
+        console.error(`Payment ${paymentId} not approved`);
+        return res.status(400).json({ error: 'Payment not approved' });
+      }
+
+      // Update session as paid
+      const session = await Session.findOne({ id: sessionId });
+      if (!session) {
+        console.error(`Session ${sessionId} not found`);
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      session.isPaid = true;
+      await session.save();
+      
+      console.log(`Session ${sessionId} marked as paid`);
     }
 
     res.status(200).send('OK');

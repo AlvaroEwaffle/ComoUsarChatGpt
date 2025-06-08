@@ -1,7 +1,8 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 export class MercadoPagoService {
   private client: MercadoPagoConfig;
+  private readonly PAYMENT_AMOUNT = 90; // $9.990 CLP
 
   constructor() {
     const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -19,44 +20,58 @@ export class MercadoPagoService {
         body: {
           items: [
             {
-              id: 'id',
+              id: sessionId,
               title: "Servicio potenciado con IA",
-              unit_price: 100,
-              quantity: 1
+              unit_price: this.PAYMENT_AMOUNT,
+              quantity: 1,
+              currency_id: "CLP"
             }
           ],
           back_urls: {
-            failure: "http://localhost:5173/error",
-            pending: "http://localhost:5173/pending",
-            success: `http://localhost:5173/success/${sessionId}`,
+            failure: "https://comousaria.pages.dev/error",
+            pending: "https://comousaria.pages.dev/pending",
+            success: `https://comousaria.pages.dev/success/${sessionId}`,
           },
-          //auto_return: 'approved',
+          auto_return: 'approved',
+          notification_url: "https://comousarchatgpt-production.up.railway.app/api/sessions/webhook",
           metadata: {
             sessionId
           }
         }
-      })
-      console.log('--------------------------------');
-      console.log('response', response);
+      });
 
-      // Return only the needed fields
+      if (!response.id || !response.init_point) {
+        throw new Error('Invalid response from Mercado Pago');
+      }
+
       return {
-        id: String(response.id || ''),
-        init_point: String(response.init_point || '')
+        id: String(response.id),
+        init_point: String(response.init_point)
       };
     } catch (error) {
       console.error('Error creating payment:', error);
-      throw error;
+      throw new Error('Failed to create payment preference');
+    }
+  }
+
+  async verifyPayment(paymentId: string): Promise<boolean> {
+    try {
+      const payment = new Payment(this.client);
+      const paymentData = await payment.get({ id: paymentId });
+      
+      return paymentData.status === 'approved';
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      throw new Error('Failed to verify payment');
     }
   }
 
   async handlePaymentNotification(paymentId: string): Promise<void> {
     try {
-      // Here you would typically:
-      // 1. Verify the payment status with Mercado Pago
-      // 2. Update the session in the database to mark it as paid
-      // 3. Send any necessary notifications
-      console.log(`Payment ${paymentId} processed`);
+      const isApproved = await this.verifyPayment(paymentId);
+      if (!isApproved) {
+        throw new Error('Payment not approved');
+      }
     } catch (error) {
       console.error('Error handling payment notification:', error);
       throw error;
