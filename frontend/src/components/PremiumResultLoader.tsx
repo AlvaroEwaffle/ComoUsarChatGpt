@@ -158,7 +158,9 @@ const PremiumResultLoader = () => {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:3000/api/sessions/${sessionId}/premium`)
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    if (!backendUrl) throw new Error('VITE_BACKEND_URL is not set');
+    fetch(`${backendUrl}/api/sessions/${sessionId}/premium`)
       .then(res => {
         if (!res.ok) throw new Error('No se pudo cargar el resultado premium');
         return res.json();

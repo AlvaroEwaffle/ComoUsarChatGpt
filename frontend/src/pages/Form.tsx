@@ -38,7 +38,9 @@ const Form = () => {
     localStorage.setItem('serviceFormData', JSON.stringify(formData));
 
     try {
-      const response = await fetch('http://localhost:3000/api/sessions', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      if (!backendUrl) throw new Error('VITE_BACKEND_URL is not set');
+      const response = await fetch(`${backendUrl}/api/sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

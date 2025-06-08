@@ -54,7 +54,9 @@ const Preview = () => {
     const fetchSessionData = async () => {
       let data;
       try {
-        const response = await fetch(`http://localhost:3000/api/sessions/${sessionId}`);
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
+        if (!backendUrl) throw new Error('VITE_BACKEND_URL is not set');
+        const response = await fetch(`${backendUrl}/api/sessions/${sessionId}`);
         if (!response.ok) {
           throw new Error('Error al cargar la sesión');
         }
@@ -92,7 +94,9 @@ const Preview = () => {
 
   const handlePayment = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/sessions/pago', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      if (!backendUrl) throw new Error('VITE_BACKEND_URL is not set');
+      const response = await fetch(`${backendUrl}/api/sessions/pago`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,7 +175,7 @@ const Preview = () => {
             </p>
           </div>
 
-          {/* ===== Service Overview Cards ===== */}
+          {/* ===== Service Overview Cards =====
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
               🎯 Tu perfil como experto
@@ -180,28 +184,29 @@ const Preview = () => {
               Ya definimos tu audiencia ideal, lo que ofreces y los resultados que generas. Así vas a conectar con más clientes.
             </p>
             <div className="grid md:grid-cols-3 gap-6">
-              {/* Target Audience Card */}
+              {/* Target Audience Card 
               <div className="text-center p-4 bg-white rounded-lg">
                 <Users className="w-8 h-8 text-primary-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-gray-900 mb-1">👥 Público objetivo</h3>
                 <p className="text-sm text-gray-600">{formData?.targetAudience}</p>
               </div>
 
-              {/* Service Card */}
+              {/* Service Card 
               <div className="text-center p-4 bg-white rounded-lg">
                 <Sparkles className="w-8 h-8 text-primary-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-gray-900 mb-1">🎤 Servicio ofrecido</h3>
                 <p className="text-sm text-gray-600">{formData?.service}</p>
               </div>
 
-              {/* Results Card */}
+              {/* Results Card 
               <div className="text-center p-4 bg-white rounded-lg">
                 <TrendingUp className="w-8 h-8 text-primary-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-gray-900 mb-1">🌟 Resultados que entregas</h3>
                 <p className="text-sm text-gray-600">{formData?.results}</p>
               </div>
             </div>
-          </div>
+          </div>  */}
+
 
           {/* ===== Main Content Card ===== */}
           <Card className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-8">
@@ -223,9 +228,7 @@ const Preview = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 ✨ ¿Y si llevaras tu servicio al siguiente nivel con IA?
               </h3>
-              <p className="text-lg text-gray-800 leading-relaxed mb-4">
-                Te mostramos cómo podrías personalizar tu enseñanza, ahorrar tiempo y sorprender a tus clientes con experiencias únicas.
-              </p>
+
               <p className="text-lg text-gray-800 leading-relaxed">
                 {sessionData?.preview.descripcion_potencia_ia}
               </p>
