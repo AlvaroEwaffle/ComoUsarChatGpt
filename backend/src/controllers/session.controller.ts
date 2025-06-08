@@ -137,24 +137,63 @@ export const webhookPago = async (req: Request, res: Response) => {
       return res.status(200).send('OK');
     }
 
-    // Verify webhook signature
-    const signature = req.headers['x-signature'] as string;
-    const timestamp = req.headers['x-timestamp'] as string;
+    // Handle test webhook from developer panel
+    if (req.body.topic === 'payment' && req.body.dataId) {
+      console.log("=== WEBHOOK DE PRUEBA DEL PANEL DE DESARROLLADORES ===");
+      const paymentId = req.body.dataId;
+      // Convert ID back to UUID format
+      const sessionId = paymentId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+
+      console.log("Payment ID:", paymentId);
+      console.log("Session ID (UUID):", sessionId);
+
+      // Update session as paid
+      console.log("Buscando sesión en la base de datos...");
+      const session = await Session.findOne({ id: sessionId });
+      if (!session) {
+        console.error(`Session ${sessionId} not found`);
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      console.log("Actualizando sesión como pagada...");
+      session.isPaid = true;
+      await session.save();
+      
+      console.log(`Session ${sessionId} marked as paid successfully`);
+      return res.status(200).send('OK');
+    }
+
+    // Verify webhook signature for production webhooks
+    const signatureHeader = req.headers['x-signature'] as string;
     const webhookSecret = process.env.MP_WEBHOOK_SECRETKEY;
 
     console.log("=== VERIFICACIÓN DE FIRMA ===");
-    console.log("Signature present:", !!signature);
-    console.log("Timestamp present:", !!timestamp);
+    console.log("Signature header:", signatureHeader);
     console.log("WebhookSecret present:", !!webhookSecret);
 
-    if (!signature || !timestamp || !webhookSecret) {
+    if (!signatureHeader || !webhookSecret) {
       console.error('Missing webhook verification data:', {
-        signature: !!signature,
-        timestamp: !!timestamp,
+        signatureHeader: !!signatureHeader,
         webhookSecret: !!webhookSecret
       });
       return res.status(400).json({ error: 'Invalid webhook request' });
     }
+
+    // Parse signature header (format: ts=timestamp,v1=signature)
+    const signatureParts = signatureHeader.split(',');
+    const timestampMatch = signatureParts[0].match(/ts=(\d+)/);
+    const signatureMatch = signatureParts[1].match(/v1=([a-f0-9]+)/);
+
+    if (!timestampMatch || !signatureMatch) {
+      console.error('Invalid signature format:', signatureHeader);
+      return res.status(400).json({ error: 'Invalid signature format' });
+    }
+
+    const timestamp = timestampMatch[1];
+    const signature = signatureMatch[1];
+
+    console.log("Parsed timestamp:", timestamp);
+    console.log("Parsed signature:", signature);
 
     // Create signature verification string
     const payload = JSON.stringify(req.body);
@@ -166,6 +205,7 @@ export const webhookPago = async (req: Request, res: Response) => {
     const calculatedSignature = hmac.digest('hex');
 
     console.log("=== COMPARACIÓN DE FIRMAS ===");
+    console.log("Verification string:", verificationString);
     console.log("Received signature:", signature);
     console.log("Calculated signature:", calculatedSignature);
 
