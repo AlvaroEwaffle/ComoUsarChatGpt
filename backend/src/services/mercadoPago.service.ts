@@ -17,9 +17,7 @@ export class MercadoPagoService {
     try {
       const preference = new Preference(this.client);
       //Create a ID for the payment with the sessionId but taking out the -
-      const paymentId = sessionId.replace(/-/g, '');
-      console.log("createPayment Payment ID:", paymentId);
-
+      
       const response = await preference.create({
         body: {
           items: [
@@ -48,7 +46,8 @@ export class MercadoPagoService {
       if (!response.id || !response.init_point) {
         throw new Error('Invalid response from Mercado Pago');
       }
-      console.log("=========================MERCADO PAGO=========================")
+      
+      console.log("=========================MERCADO PAGO CREATE PAYMENT =========================")
       console.log("createPayment Response:", response);
       console.log("createPayment Response ID:", response.id);
       console.log("createPayment Response init_point:", response.init_point);
@@ -63,34 +62,30 @@ export class MercadoPagoService {
     }
   }
 
-  async verifyPayment(paymentId: string): Promise<boolean> {
+  async verifyPayment(paymentId: string): Promise<{ status: string, external_reference: string }> {
     try {
-      console.log("Verificando pago con ID:", paymentId);
+      
       // Create a new Payment instance
       const payment = new Payment(this.client);
       console.log("=========================MERCADO PAGO VERIFY =========================")
-      console.log(paymentId)
+      console.log("Verificando pago con ID:", paymentId);
       const paymentData = await payment.get({ id: paymentId });
-      console.log("Payment response:", paymentData);
 
       if (!paymentData || !paymentData.status) {
         console.log("No payment data received from Mercado Pago");
-        return false;
+        return { status: 'pending', external_reference: '' };
       }
 
       const status = paymentData.status;
-      console.log("Payment status:", status);
-
-      return status === 'approved';
+      const external_reference = paymentData.external_reference || '';
+      //We need to return the status and the external reference
+      return { status: status, external_reference: external_reference };
     } catch (error: any) {
       console.error("Error verifying payment:", error);
       // Si el pago no existe, retorna false (no true)
       if (error.error === 'resource not found') {
-        console.log("Payment not found in Mercado Pago. This could be because:");
-        console.log("1. The payment is too recent and not yet available in the API");
-        console.log("2. The payment ID is incorrect");
-        console.log("3. The payment was not created in Mercado Pago");
-        return false;
+        console.log("Error finding payment in Mercado Pago. ");
+        return { status: 'pending', external_reference: '' };
       }
       throw new Error('Failed to verify payment');
     }

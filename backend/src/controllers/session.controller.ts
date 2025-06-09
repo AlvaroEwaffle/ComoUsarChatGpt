@@ -128,6 +128,9 @@ export const getSessionById = async (req: Request, res: Response) => {
 
 
 export const paySession = async (req: Request, res: Response) => {
+  console.log("=== PAY SESSION ===");
+  console.log("Body:", req.body);
+  console.log("Body sessionId:", req.body.sessionId);
   try {
     const { sessionId } = req.body;
     const session = await Session.findOne({ id: sessionId });
@@ -218,7 +221,12 @@ export const getPremiumResult = async (req: Request, res: Response) => {
   }
 };
 
+//We need to check where and get the Body: { resource: '114431879686', topic: 'payment' }
 export const getPaymentStatus = async (req: Request, res: Response) => {
+  console.log("=== GET PAYMENT STATUS ===");
+  console.log("Params:", req.params);
+  console.log("Params sessionId:", req.params.sessionId);
+
   try {
     const { sessionId } = req.params;
     console.log(`[getPaymentStatus] Checking status for sessionId: ${sessionId}`);
@@ -267,74 +275,35 @@ export const getPaymentStatus = async (req: Request, res: Response) => {
 
 export const webhookPago = async (req: Request, res: Response) => {
   console.log("=== WEBHOOK RECIBIDO ===");
-  console.log("Headers:", JSON.stringify(req.headers, null, 2));
-  console.log("Body:", JSON.stringify(req.body, null, 2));
-
   try {
     // Obtenemos el cuerpo de la petición que incluye información sobre la notificación
     const body: { data: { id: string } } = req.body;
-    console.log("Body:", body);
-    console.log("Body data:", body.data);
     console.log("Body data id:", body.data.id);
 
     // Obtenemos el pago
     const isPaid = await mercadoPagoService.verifyPayment(body.data.id);
     console.log("isPaid:", isPaid);
+    console.log("External reference:", isPaid.external_reference);
 
     // Process payment
     console.log("=== PROCESANDO PAGO ===");
-    console.log("Payment type:", req.body.type);
-    console.log("Payment data:", JSON.stringify(req.body.data, null, 2));
+    console.log("isPaid:", isPaid);
+    console.log("External reference:", isPaid.external_reference);
 
-    try {
-      // Get payment ID from either external_reference or id
-      const paymentId = req.body.data?.external_reference || req.body.data?.id;
-      if (!paymentId) {
-        console.error("No payment ID found in request");
-        return res.status(400).json({ error: 'No payment ID found' });
-      }
-
-      // Convert ID to UUID format if it doesn't have dashes
-      const sessionId = paymentId.includes('-') ? paymentId :
-        paymentId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
-
-      console.log("Payment ID:", paymentId);
-      console.log("Session ID (UUID):", sessionId);
-
-      // Verify payment with Mercado Pago
-      console.log("Verificando pago con Mercado Pago...");
-      const payment = await mercadoPagoService.verifyPayment(paymentId);
-      console.log("Payment status:", payment);
-
-      if (payment !== true) {
-        console.log("Payment not approved");
-        return res.status(200).send('OK');
-      }
-
-      // Update session
-      console.log("Buscando sesión en la base de datos...");
-      let session = null;
-      if (sessionId) {
-        session = await Session.findOne({ id: sessionId });
-      }
-      if (!session && paymentId) {
-        session = await Session.findOne({ paymentId });
-      }
-      if (!session) {
-        console.error(`Session ${sessionId || paymentId} not found`);
-        return res.status(404).json({ error: 'Session not found' });
-      }
-
-      console.log("Actualizando sesión como pagada...");
-      session.isPaid = true;
-      await session.save();
-
-      console.log(`Session ${sessionId} marked as paid successfully`);
+    if (!isPaid) {
+      console.log("Payment not approved");
       return res.status(200).send('OK');
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      return res.status(500).json({ error: 'Error processing payment' });
     }
+
+    const session = await Session.findOne({ id: isPaid.external_reference });
+    if (!session) {
+      console.log("Session not found");
+      return res.status(200).send('OK');
+    }
+    session.isPaid = true;
+    await session.save();
+
+    return res.status(200).send('OK');
   } catch (error) {
     console.error('=== ERROR PROCESANDO WEBHOOK ===');
     console.error('Error details:', error);
