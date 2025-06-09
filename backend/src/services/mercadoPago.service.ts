@@ -2,7 +2,7 @@ import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 export class MercadoPagoService {
   private client: MercadoPagoConfig;
-  private readonly PAYMENT_AMOUNT = 90; // $9.990 CLP
+  private readonly PAYMENT_AMOUNT = 9790; // $9.990 CLP
 
   constructor() {
     const accessToken = process.env.MP_ACCESS_TOKEN;
