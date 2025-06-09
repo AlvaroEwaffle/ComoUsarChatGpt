@@ -1,16 +1,33 @@
-
 import { CheckCircle, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 
 const Success = () => {
   const navigate = useNavigate();
+  const { sessionId } = useParams();
 
   useEffect(() => {
     // Mark payment as completed
     localStorage.setItem('paymentCompleted', 'true');
-  }, []);
+
+    // Consultar el estado del pago
+    if (sessionId) {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      if (!backendUrl) {
+        console.error('VITE_BACKEND_URL is not set');
+        return;
+      }
+      fetch(`${backendUrl}/api/sessions/${sessionId}/payment-status`)
+        .then(res => res.json())
+        .then(data => {
+          console.log('[Success] Payment status result:', data);
+        })
+        .catch(err => {
+          console.error('[Success] Error fetching payment status:', err);
+        });
+    }
+  }, [sessionId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center">

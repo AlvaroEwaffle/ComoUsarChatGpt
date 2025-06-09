@@ -161,7 +161,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Form />} />
           <Route path="/preview/:sessionId" element={<Preview />} />
-          <Route path="/success" element={<Success />} />
+          <Route path="/success/:sessionId" element={<Success />} />
           <Route path="/error" element={<Error />} />
           <Route path="/premium-result-demo" element={<PremiumResult data={mockPremiumData} />} />
           <Route path="/premium-result/:sessionId" element={<PremiumResultLoader />} />
