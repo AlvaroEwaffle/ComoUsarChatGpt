@@ -224,7 +224,6 @@ export const getPremiumResult = async (req: Request, res: Response) => {
 //We need to check where and get the Body: { resource: '114431879686', topic: 'payment' }
 export const getPaymentStatus = async (req: Request, res: Response) => {
   console.log("=== GET PAYMENT STATUS ===");
-  console.log("Params:", req.params);
   console.log("Params sessionId:", req.params.sessionId);
 
   try {
@@ -245,24 +244,10 @@ export const getPaymentStatus = async (req: Request, res: Response) => {
       return;
     }
 
-    // Si no está pagada, consulta Mercado Pago
-    if (!session.paymentId) {
-      console.log(`[getPaymentStatus] No paymentId found for session: ${sessionId}`);
-      res.json({ status: 'pending' });
-      return;
-    }
+    // Si no está pagada, retornar que no esta pagada
 
-    console.log(`[getPaymentStatus] Verifying payment with Mercado Pago. paymentId: ${session.paymentId}`);
-    const isPaid = await mercadoPagoService.verifyPayment(session.paymentId);
-    console.log(`[getPaymentStatus] Payment status: ${isPaid}`);
-    if (isPaid) {
-      console.log(`[getPaymentStatus] Payment approved for session: ${sessionId}. Updating session as paid.`);
-      session.isPaid = true;
-      await session.save();
-      res.json({ status: 'paid' });
-      return;
-    } else {
-      console.log(`[getPaymentStatus] Payment not approved for session: ${sessionId}. Returning pending.`);
+    if (!session.isPaid) {
+      console.log(`[getPaymentStatus] No paymentId found for session: ${sessionId}`);
       res.json({ status: 'pending' });
       return;
     }
