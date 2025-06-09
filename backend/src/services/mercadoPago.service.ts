@@ -48,7 +48,10 @@ export class MercadoPagoService {
       if (!response.id || !response.init_point) {
         throw new Error('Invalid response from Mercado Pago');
       }
+      console.log("=========================MERCADO PAGO=========================")
+      console.log("createPayment Response:", response);
       console.log("createPayment Response ID:", response.id);
+      console.log("createPayment Response init_point:", response.init_point);
 
       return {
         id: String(response.id),
@@ -63,15 +66,12 @@ export class MercadoPagoService {
   async verifyPayment(paymentId: string): Promise<boolean> {
     try {
       console.log("Verificando pago con ID:", paymentId);
-      
-      // Remove any dashes from the payment ID
-      const cleanPaymentId = paymentId.replace(/-/g, '');
-      console.log("Payment ID after cleaning:", cleanPaymentId);
-
       // Create a new Payment instance
       const payment = new Payment(this.client);
-      const paymentData = await payment.get({ id: cleanPaymentId });
-      console.log("Payment response:", JSON.stringify(paymentData, null, 2));
+      console.log("=========================MERCADO PAGO VERIFY =========================")
+      console.log(paymentId)
+      const paymentData = await payment.get({ id: paymentId });
+      console.log("Payment response:", paymentData);
 
       if (!paymentData || !paymentData.status) {
         console.log("No payment data received from Mercado Pago");
@@ -84,20 +84,14 @@ export class MercadoPagoService {
       return status === 'approved';
     } catch (error: any) {
       console.error("Error verifying payment:", error);
-      
-      // If the payment is not found, it might be because it's too recent
-      // or the ID is incorrect. We'll log this specifically.
+      // Si el pago no existe, retorna false (no true)
       if (error.error === 'resource not found') {
         console.log("Payment not found in Mercado Pago. This could be because:");
         console.log("1. The payment is too recent and not yet available in the API");
         console.log("2. The payment ID is incorrect");
         console.log("3. The payment was not created in Mercado Pago");
-        
-        // For now, we'll return true to allow the webhook to proceed
-        // This is because sometimes the webhook arrives before the payment is available in the API
-        return true;
+        return false;
       }
-
       throw new Error('Failed to verify payment');
     }
   }

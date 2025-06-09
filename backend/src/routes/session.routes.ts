@@ -4,7 +4,8 @@ import {
   getSessionById,
   webhookPago,
   paySession,
-  getPremiumResult
+  getPremiumResult,
+  getPaymentStatus
 } from '../controllers/session.controller'
 
 const router = Router()
@@ -14,5 +15,6 @@ router.get('/:id', getSessionById as RequestHandler)
 router.post('/pago', paySession as RequestHandler)
 router.post('/webhook', webhookPago as RequestHandler)
 router.get('/:sessionId/premium', getPremiumResult as RequestHandler)
+router.get('/:sessionId/payment-status', getPaymentStatus as RequestHandler)
 
 export default router
