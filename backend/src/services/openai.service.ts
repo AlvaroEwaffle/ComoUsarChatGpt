@@ -29,6 +29,7 @@ export async function generateSession(input: any) {
         Tu objetivo es crear una transformación tangible. 
         Tu estilo debe ser inspirador, claro y accionable. 
         El output debe generar deseo inmediato de pasar a la versión Pro.
+        La respuesta debe ser en español.
         Responde SOLO en JSON ESTRICTAMENTE válido. 
         NO incluyas comas finales (trailing commas) en listas o objetos. NO incluyas explicaciones ni texto fuera del JSON.`
       },
@@ -117,6 +118,7 @@ export async function generatePremiumSession(input: {
       content: `
 Eres un consultor experto en diseño de servicios para emprendedores. Recibes la parte gratuita (preview) y debes generar la estructura completa del plan premium. Responde SOLO en JSON válido, SIN texto adicional. 
 El campo 'premium' debe contener solo los datos premium, no repitas la parte gratuita. 
+La respuesta debe ser en español.
 No dejes ningún campo vacío ni como objeto vacío. Llena todos los campos con ejemplos realistas y detallados.
 La estructura debe ser exactamente la siguiente (rellena todos los campos):
 {
