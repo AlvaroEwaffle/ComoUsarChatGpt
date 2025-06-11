@@ -252,25 +252,56 @@ const Preview = () => {
             </div>
 
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              🔓 Desbloquea tu servicio profesional con IA
+              🔓 Desbloquea tu servicio profesional potenciado con IA
             </h3>
             <div className="border-2 border-primary-200 rounded-xl p-6 mb-8 bg-primary-50">
               <div className="text-center max-w-md mx-auto">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Accede a tu propuesta de valor lista para compartir
+                  Lleva tu propuesta al siguiente nivel con una estructura clara, prompts listos para usar, y una landing page para vender más fácil.
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  Prompts listos para usar
-                </p>
-                <div className="text-3xl font-bold text-primary-500 mb-6">
-                  💰 Solo $9.990 CLP
+
+                <div className="space-y-4 mb-8 text-left">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">🧠</span>
+                    <span>Tu propuesta de valor para redes, bio y presentaciones</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">🗺️</span>
+                    <span>Mapa del servicio con etapas claras, beneficios y CTA</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">🤖</span>
+                    <span>Prompts IA para cada etapa del servicio</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">🧩</span>
+                    <span>Infografía para compartir tu servicio visualmente</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">✅</span>
+                    <span>Checklist de calidad para evaluar y mejorar tu oferta</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">🌐</span>
+                    <span>Landing page lista para compartir</span>
+                  </div>
                 </div>
+
+                <div className="flex flex-col items-center gap-2 mb-6">
+                  <div className="text-xl text-gray-500 line-through">
+                    Precio regular: $19.970 CLP
+                  </div>
+                  <div className="text-3xl font-bold text-primary-500">
+                    🛍️ Precio lanzamiento: $9.970 CLP
+                  </div>
+                </div>
+
                 <Button
                   onClick={handlePayment}
                   size="lg"
                   className="bg-yellow-500 hover:bg-primary-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-4"
                 >
-                  Desbloquear ahora
+                  ➡️ Desbloquear ahora
                 </Button>
                 <Button
                   onClick={() => navigate('/premium-result/mock')}
@@ -278,12 +309,12 @@ const Preview = () => {
                   variant="outline"
                   className="border-purple-300 bg-purple-300 text-black-200 font-semibold mb-2"
                 >
-                  Ver un Ejemplo de lo que obtendrás
+                  🔍 Ver un ejemplo completo de lo que obtienes
                 </Button>
                 <div className="mt-6 space-y-2 text-sm text-gray-600">
                   <p className="flex items-center justify-center space-x-2">
                     <Check className="w-4 h-4 text-green-500" />
-                    <span>Más de 500 profesionales ya han potenciado sus servicios con esta herramienta</span>
+                    <span>Más de 50 profesionales ya han potenciado sus servicios con Suria</span>
                   </p>
                   <p className="flex items-center justify-center space-x-2">
                     <Lock className="w-4 h-4 text-primary-500" />
@@ -492,10 +523,14 @@ const Preview = () => {
                     <Check className="w-5 h-5 text-green-500 mt-1" />
                     <span>Una mini landing page para atraer más clientes</span>
                   </li>
-
                 </ul>
-                <div className="text-3xl font-bold text-primary-500 mb-6 text-center">
-                  💰 Solo $9.990 CLP
+                <div className="flex flex-col items-center gap-2 mb-6">
+                  <div className="text-xl text-gray-500 line-through">
+                    Original $19.970 CLP
+                  </div>
+                  <div className="text-3xl font-bold text-primary-500">
+                    Por lanzamiento $9.970 CLP
+                  </div>
                 </div>
                 <div className="flex flex-col items-center">
                   <Button

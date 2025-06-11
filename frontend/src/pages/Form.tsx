@@ -82,9 +82,15 @@ const Form = () => {
       <main className="max-w-6xl mx-auto px-4 md:px-8 pt-12 md:pt-20">
         <div className="text-center animate-fade-in">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Descrube como potenciar
-            <span className="text-primary-500 block">tu servicio profesional con IA</span>
+            Transforma tu servicio en una propuesta clara, profesional y potenciada con IA
           </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+            Descubre gratis cómo mejorar tu propuesta de valor, estructurar tu servicio y automatizarlo con inteligencia artificial.
+            <br />
+            <br />
+            Que vas a obtener:
+            
+          </p>
         </div>
 
         {/* Features Section */}
@@ -124,34 +130,33 @@ const Form = () => {
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-12">
         <div className="animate-fade-in">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
-              Empieza a aquí gratis
-            </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Completa estos campos para que podamos generar una propuesta de valor
-              y estructura profesional personalizada para tu servicio.
+              Completa estos campos para generar una propuesta personalizada. Tómalo como el primer paso para profesionalizar y escalar tu servicio con ayuda de IA.
+              <br />
+              <br />
+              Mientras más detallado y claro seas, mejor será la propuesta.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 md:p-12 space-y-8">
             <div className="space-y-4">
               <label className="block text-lg font-semibold text-gray-900">
-                1. ¿Qué servicio ofreces?
+                1. ¿Qué haces y para quién?
               </label>
               <p className="text-gray-600 text-sm">
-                Describe brevemente tu servicio principal y qué haces por tus clientes.
+                Describe brevemente tu servicio principal y a quién va dirigido.
               </p>
               <Textarea
                 value={formData.service}
                 onChange={(e) => handleInputChange('service', e.target.value)}
-                placeholder="Ej: Ofrezco consultoría en marketing digital para pequeñas empresas, ayudándolas a crear estrategias de redes sociales que generen más ventas..."
+                placeholder="Ej: Ofrezco clases de yoga para mujeres mayores de 50 que buscan reconectarse con su cuerpo."
                 className="min-h-[120px] text-base"
               />
             </div>
 
             <div className="space-y-4">
               <label className="block text-lg font-semibold text-gray-900">
-                2. ¿Cuáles son tus principales fortalezas?
+                2. ¿Por qué tú?
               </label>
               <p className="text-gray-600 text-sm">
                 Menciona tus habilidades, experiencia o conocimientos únicos.
@@ -159,7 +164,7 @@ const Form = () => {
               <Textarea
                 value={formData.strengths}
                 onChange={(e) => handleInputChange('strengths', e.target.value)}
-                placeholder="Ej: Tengo 5 años de experiencia en marketing, certificaciones en Google Ads, especialización en e-commerce..."
+                placeholder="Ej: Tengo experiencia con personas mayores y formación en yoga terapéutico."
                 className="min-h-[120px] text-base"
               />
             </div>
@@ -174,14 +179,14 @@ const Form = () => {
               <Textarea
                 value={formData.targetAudience}
                 onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-                placeholder="Ej: Dueños de pequeñas empresas de retail, entre 30-50 años, que facturan entre $10M-$50M anuales y quieren digitalizar sus ventas..."
+                placeholder="Ej: Mujeres entre 50 y 65 años que buscan un espacio de bienestar físico y emocional."
                 className="min-h-[120px] text-base"
               />
             </div>
 
             <div className="space-y-4">
               <label className="block text-lg font-semibold text-gray-900">
-                4. ¿Qué resultados entregas?
+                4. ¿Qué resultado entregas?
               </label>
               <p className="text-gray-600 text-sm">
                 Especifica los beneficios concretos que obtienen tus clientes.
@@ -189,7 +194,7 @@ const Form = () => {
               <Textarea
                 value={formData.results}
                 onChange={(e) => handleInputChange('results', e.target.value)}
-                placeholder="Ej: Aumento del 30% en ventas online, reducción del 50% en costo por adquisición de clientes, presencia profesional en redes sociales..."
+                placeholder="Ej: Mejoran su movilidad, reducen el estrés y se sienten más en control de su salud."
                 className="min-h-[120px] text-base"
               />
             </div>
@@ -208,8 +213,7 @@ const Form = () => {
                   </>
                 ) : (
                   <>
-                    Generar mi propuesta de valor
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    ➡️ Generar mi propuesta gratuita
                   </>
                 )}
               </Button>
