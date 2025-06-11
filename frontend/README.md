@@ -1,73 +1,119 @@
-# Welcome to your Lovable project
+# 🚀 ComoUsarChatGPT - Potencia tu Servicio con IA y Monetiza Fácilmente
 
-## Project info
+¡Convierte tu experiencia en un servicio irresistible y cobra online en minutos! Esta app te permite crear, personalizar y vender tu propuesta profesional con el poder de la inteligencia artificial y la integración directa con Mercado Pago.
 
-**URL**: https://lovable.dev/projects/c9a29669-039d-4111-b34d-285c6b9a8821
+---
 
-## How can I edit this code?
+## 🌟 ¿Por qué ComoUsarChatGPT?
 
-There are several ways of editing your application.
+- **Crea tu oferta premium en minutos:** Completa un formulario y obtén una estructura profesional lista para vender.
+- **Monetiza sin fricción:** Recibe pagos online con Mercado Pago y entrega contenido premium automáticamente.
+- **Experiencia WOW para tus clientes:** Interfaz moderna, mensajes claros y acceso instantáneo tras el pago.
+- **Automatiza tu negocio:** Olvídate de la gestión manual, la app lo hace todo por ti.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c9a29669-039d-4111-b34d-285c6b9a8821) and start prompting.
+## 🛠️ Tecnologías que potencian tu éxito
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Vite + React + TypeScript**: Velocidad y robustez para una experiencia fluida.
+- **shadcn-ui + Tailwind CSS**: Diseño atractivo y adaptable a cualquier dispositivo.
+- **Mercado Pago**: Cobros seguros y confiables en Latinoamérica.
+- **React Query & Router**: Navegación y datos en tiempo real, sin recargas.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 💡 ¿Cómo funciona?
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Completa el formulario** con tu servicio, fortalezas y público objetivo.
+2. **Previsualiza** tu propuesta gratuita generada por IA.
+3. **Activa el pago** y deja que Mercado Pago haga la magia.
+4. **El usuario paga y accede al contenido premium** en segundos.
+5. **Tú solo miras crecer tu negocio.**
 
-Follow these steps:
+---
+
+## ⚡ Instalación rápida
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clona el repo y entra a la carpeta
+ git clone <YOUR_GIT_URL>
+ cd <YOUR_PROJECT_NAME>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Instala dependencias
+ npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Configura tus variables de entorno
+ cp .env.example .env
+ # Edita .env con tu backend y clave pública de Mercado Pago
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Inicia el servidor de desarrollo
+ npm run dev
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🌍 Variables de entorno esenciales
 
-**Use GitHub Codespaces**
+```
+VITE_BACKEND_URL=https://comousarchatgpt-production.up.railway.app
+VITE_MP_PUBLIC_KEY=TU_PUBLIC_KEY_MERCADOPAGO
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+> **Recuerda:** Las variables deben estar listas **antes de hacer el build**.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🚀 Despliegue y producción
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```sh
+npm run build
+npm run preview # (opcional, para previsualizar)
+```
 
-## How can I deploy this project?
+Despliega en Cloudflare Pages, Vercel, Netlify o tu plataforma favorita.
 
-Simply open [Lovable](https://lovable.dev/projects/c9a29669-039d-4111-b34d-285c6b9a8821) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 💳 Flujo de usuario premium
 
-Yes, you can!
+1. El usuario ve tu propuesta gratuita.
+2. Decide pagar y es redirigido a Mercado Pago.
+3. Tras el pago, la app verifica automáticamente el estado.
+4. ¡Acceso instantáneo al contenido premium y experiencia memorable!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🏆 Diferenciadores clave
+
+- **Automatización total:** Desde el pago hasta la entrega del contenido.
+- **Sin código, sin complicaciones:** Solo personaliza y lanza.
+- **Escalable:** Ideal para coaches, consultores, creadores y expertos.
+- **Soporte para múltiples dispositivos y pagos seguros.**
+
+---
+
+## 📂 Estructura relevante
+
+- `src/pages/` — Páginas principales (formulario, preview, success, premium, etc.)
+- `src/components/` — Componentes UI y lógica reutilizable
+- `src/hooks/` — Custom hooks para lógica avanzada
+
+---
+
+## 📝 Notas finales
+
+- El backend debe estar online y accesible desde la URL configurada.
+- Mercado Pago requiere cuenta y credenciales válidas.
+- Si cambias variables de entorno, **haz un nuevo build**.
+
+---
+
+## 💬 ¿Listo para vender tu conocimiento como nunca antes?
+
+¡Lanza tu servicio premium con ComoUsarChatGPT y deja que la tecnología trabaje para ti!
+
+---
+
+## 📄 Licencia
+
+MIT

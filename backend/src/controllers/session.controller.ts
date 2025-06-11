@@ -6,6 +6,7 @@ import { MercadoPagoService } from '../services/mercadoPago.service';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import { Payment } from 'mercadopago';
+import { sendSlackNotification } from '../utils/slack';
 
 // MongoDB connection string (replace with your actual connection string)
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/comousarchatgpt';
@@ -74,8 +75,14 @@ export const createSession = async (req: Request, res: Response) => {
       createdAt: new Date()
     });
 
+    // Notificar a Slack
+    await sendSlackNotification(`🆕 Nueva sesión creada: ${service} - ${sessionId}`);
+
+    console.log("Session created:", session);
+
     // Save session to MongoDB
     await session.save();
+    
 
     res.status(201).json({
       sessionId,
@@ -126,7 +133,6 @@ export const getSessionById = async (req: Request, res: Response) => {
   }
 };
 
-
 export const paySession = async (req: Request, res: Response) => {
   console.log("=== PAY SESSION ===");
   console.log("Body:", req.body);
@@ -147,6 +153,8 @@ export const paySession = async (req: Request, res: Response) => {
     // Guardar el paymentId en la sesión
     session.paymentId = response.id;
     await session.save();
+    // Notificar a Slack
+    await sendSlackNotification(`💳 Pago iniciado para sesión: ${sessionId} (paymentId: ${response.id})`);
     // Treat response as an object with id and init_point
     return res.json({
       success: true,
@@ -175,6 +183,7 @@ export const getPremiumResult = async (req: Request, res: Response) => {
 
     // If already generated, return it
     if (session.premium_development) {
+      await sendSlackNotification(`⭐️ Acceso a premium entregado para sesión: ${sessionId}`);
       return res.json({
         sessionId: session.id,
         preview: {
@@ -204,6 +213,8 @@ export const getPremiumResult = async (req: Request, res: Response) => {
     session.pro = premiumData;
     session.premium_development = true;
     await session.save();
+    // Notificar a Slack
+    await sendSlackNotification(`⭐️ Premium generado y entregado para sesión: ${sessionId}`);
 
     res.json({
       sessionId: session.id,
@@ -221,7 +232,7 @@ export const getPremiumResult = async (req: Request, res: Response) => {
   }
 };
 
-//We need to check where and get the Body: { resource: '114431879686', topic: 'payment' }
+
 export const getPaymentStatus = async (req: Request, res: Response) => {
   console.log("=== GET PAYMENT STATUS ===");
   console.log("Params sessionId:", req.params.sessionId);
